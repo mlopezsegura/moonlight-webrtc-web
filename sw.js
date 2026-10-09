@@ -1,6 +1,6 @@
 // Service worker: makes the client installable and lets it open without a network round trip.
 // Bump VERSION whenever any file below changes, so installed copies pick up the new files.
-const VERSION = "1";
+const VERSION = "2";
 const CACHE = `moonlight-webrtc-${VERSION}`;
 const FILES = [
   "./",

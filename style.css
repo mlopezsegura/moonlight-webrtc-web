@@ -92,6 +92,7 @@ main {
 .help p { margin: 0 0 8px; }
 .help ol { margin: 0 0 8px; padding-left: 20px; }
 .help a { color: #ffd77a; }
+.help code { font-size: 0.9em; }
 
 .pin {
   font-size: 3.5rem;
