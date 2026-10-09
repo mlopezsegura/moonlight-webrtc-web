@@ -1,0 +1,10 @@
+{
+  "name": "moonlight-webrtc-web",
+  "private": true,
+  "description": "Browser client for Sunshine-Web-RTC with a WebAssembly core",
+  "scripts": {
+    "build:wasm": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-wasm.ps1",
+    "start": "node scripts/serve.mjs",
+    "test": "node --test tests/core.test.mjs"
+  }
+}
