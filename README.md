@@ -3,8 +3,12 @@
 ### Play your PC games in a web browser, streamed by Sunshine-Web-RTC
 
 **Moonlight WebRTC Web is a browser client for [Sunshine-Web-RTC](https://github.com/mlopezsegura/Sunshine-Web-RTC).
-Open a page in Chrome, Edge or Firefox on any computer in your home network, pair it once with a PIN, and
-play the games on your gaming PC. Nothing needs to be installed on the computer you play on.**
+Open it in Chrome or Edge on any computer in your home network, pair it once with a PIN, and play the games on
+your gaming PC. Use it straight from the web, or install it as an app.**
+
+<p align="center">
+  <a href="https://mlopezsegura.github.io/moonlight-webrtc-web/"><strong>▶ Open Moonlight WebRTC Web</strong></a>
+</p>
 
 > [!IMPORTANT]
 > **This is an early, basic version.** Gamepads work; **keyboard and mouse do not yet**, because
@@ -15,13 +19,16 @@ play the games on your gaming PC. Nothing needs to be installed on the computer 
 ## Contents
 
 - [What you need](#what-you-need)
-- [Quick start](#quick-start)
+- [Use it online](#use-it-online)
+- [Install it as an app](#install-it-as-an-app)
+- [Run it yourself](#run-it-yourself)
 - [Pairing](#pairing)
 - [Playing](#playing)
 - [Stream settings](#stream-settings)
 - [Limitations](#limitations)
 - [How it works](#how-it-works)
 - [Building and testing](#building-and-testing)
+- [Publishing](#publishing)
 - [Related projects](#related-projects)
 
 ---
@@ -31,47 +38,65 @@ play the games on your gaming PC. Nothing needs to be installed on the computer 
 | Where | What |
 | --- | --- |
 | **Gaming PC** | [Sunshine-Web-RTC](https://github.com/mlopezsegura/Sunshine-Web-RTC) running, with its WebRTC server enabled (port 8000 by default). Regular Sunshine does **not** work: it has no WebRTC server. |
-| **Computer that serves the page** | [Node.js](https://nodejs.org/) 18 or newer. It can be the gaming PC itself or any other computer. |
-| **Computer you play on** | A recent desktop browser: Chrome, Edge or Firefox. Chrome and Edge give the best results (more codecs, rumble). |
+| **Computer you play on** | A recent desktop browser. Chrome and Edge give the best results (more codecs, rumble, app install). |
 | **Network** | Both computers on the same local network. |
+
+Nothing has to be installed on the computer you play on.
 
 ---
 
-## Quick start
+## Use it online
 
-1. Download this repository and start the page server:
+1. Open **<https://mlopezsegura.github.io/moonlight-webrtc-web/>**.
+2. Enter the gaming PC's **IP address** (for example `192.168.1.20`) and port `8000`, then select **Connect**.
+3. The browser asks to **look for and connect to devices on your local network**. Choose **Allow**.
+4. The first time, pair the browser (see [Pairing](#pairing)). Then choose an application and play.
 
-   ```sh
-   git clone https://github.com/mlopezsegura/moonlight-webrtc-web.git
-   cd moonlight-webrtc-web
-   npm start
-   ```
+### Why the browser asks for local network access
 
-   No `npm install` is needed: the project has no dependencies, and the WebAssembly module is already built.
+The page comes from the internet (GitHub Pages), and the PC is on your home network. Chrome and Edge only let
+an internet page talk to devices on your network after you allow it. The same permission also lets the page
+use Sunshine-Web-RTC's unencrypted connection (`ws://`).
 
-2. Open **<http://localhost:8770>** in your browser.
+- If you dismissed or blocked the request, click the icon to the left of the address bar, open
+  **Site settings**, set **Local network access** to **Allow**, and connect again. The page shows these steps
+  when the connection fails.
+- Use the PC's **IP address** or its **`.local` name**. Other host names are blocked from https pages.
+- Browsers without that permission block the connection outright; allowing **Insecure content** in Site
+  settings unblocks it there. If neither works, [run it yourself](#run-it-yourself).
 
-3. Enter the gaming PC's address (for example `192.168.1.20`, or `127.0.0.1` if it is this computer) and
-   port `8000`, then select **Connect**.
+`?host=<address>&port=<port>` in the URL connects at once, for example
+`https://mlopezsegura.github.io/moonlight-webrtc-web/?host=192.168.1.20`.
 
-4. The first time, pair the browser (see below). Then choose an application and play.
+---
 
-### Playing from another computer
+## Install it as an app
 
-By default the page is only served to the computer running `npm start`. To open it from other computers in
-your network:
+Moonlight WebRTC Web is a Progressive Web App. In Chrome or Edge, select **Install app** in the page's top bar,
+or the install icon in the address bar. It then opens in its own window, from the Start menu, taskbar or Dock,
+like any other application.
+
+The installed app keeps working copies of its files, so it opens instantly, and updates itself when a new
+version is published. The local network permission above applies to it too.
+
+---
+
+## Run it yourself
+
+You can also serve the page from your own computer. It then loads over plain http, which needs no permission
+from the browser. You need [Node.js](https://nodejs.org/) 18 or newer.
 
 ```sh
-npm start -- --host 0.0.0.0
+git clone https://github.com/mlopezsegura/moonlight-webrtc-web.git
+cd moonlight-webrtc-web
+npm start
 ```
 
-Then open `http://<address of that computer>:8770` in the other computer's browser.
+No `npm install` is needed: the project has no dependencies, and the WebAssembly module is already built.
+Open **<http://localhost:8770>**, enter the PC's address and port `8000`, and select **Connect**.
 
-> [!NOTE]
-> Always open the page with **`http://`**, not `https://`. Sunshine-Web-RTC's connection is not encrypted
-> (`ws://`), and browsers block such connections from `https://` pages.
-
-You can also connect straight away with a link: `http://localhost:8770/?host=192.168.1.20&port=8000`.
+To open it from other computers in your network, serve it on all interfaces with `npm start -- --host 0.0.0.0`
+and open `http://<address of that computer>:8770`.
 
 ---
 
@@ -185,6 +210,8 @@ wasm/client_core.c       WebAssembly core (C)
 web/                     the page: index.html, app.mjs, core.mjs, style.css
 web/client-core.js       generated by Emscripten (committed)
 web/client-core.wasm     generated by Emscripten (committed)
+web/manifest.webmanifest web app manifest; web/sw.js is the service worker
+web/icons/               app icons (SVG sources and PNG renders)
 scripts/build-wasm.ps1   builds the WebAssembly core
 scripts/serve.mjs        dependency-free static web server
 tests/core.test.mjs      tests for the WebAssembly core
@@ -213,3 +240,11 @@ The tests check the authentication against Node.js's own HMAC-SHA256 and check t
   [Moonlight WebRTC by tsoas](https://github.com/tsoas/moonlight-webrtc-tizen).
 - [Sunshine](https://github.com/LizardByte/Sunshine) and [Moonlight](https://moonlight-stream.org/): the
   game streaming projects all of this builds on.
+
+---
+
+## Publishing
+
+Every push to `master` that changes `web/` runs [a workflow](.github/workflows/pages.yml) that publishes
+`web/` to the `gh-pages` branch, which GitHub Pages serves. When a release changes any file the service worker
+caches, increase `VERSION` in `web/sw.js` so installed apps refresh their copies.
