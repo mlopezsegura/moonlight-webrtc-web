@@ -1,0 +1,199 @@
+:root {
+  color-scheme: dark;
+  --bg: #0f1115;
+  --surface: #181b22;
+  --surface-2: #222631;
+  --text: #e8eaf0;
+  --muted: #9aa1b2;
+  --accent: #5b8cff;
+  --danger: #e5484d;
+  --radius: 10px;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+}
+
+a { color: var(--accent); }
+
+button, input, select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: var(--surface-2);
+  border: 1px solid #333949;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+}
+button:hover { border-color: var(--accent); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.danger { border-color: var(--danger); color: #ffb4b6; }
+button.link { background: none; border: none; color: var(--muted); padding: 4px 8px; }
+button.link:hover { color: var(--text); }
+
+input, select {
+  background: var(--surface-2);
+  border: 1px solid #333949;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 24px;
+  border-bottom: 1px solid #222631;
+}
+.brand { font-weight: 600; }
+.host { color: var(--muted); flex: 1; }
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.panel {
+  max-width: 520px;
+  margin: 48px auto;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 28px;
+}
+.panel h1 { margin-top: 0; font-size: 1.4rem; }
+.hint { color: var(--muted); }
+
+.form { display: grid; grid-template-columns: 1fr 110px; gap: 12px; align-items: end; }
+.form label { display: grid; gap: 6px; color: var(--muted); font-size: 0.9rem; }
+.form button { grid-column: 1 / -1; }
+
+.status { min-height: 1.4em; color: var(--muted); }
+.status.error { color: #ffb4b6; }
+
+.pin {
+  font-size: 3.5rem;
+  letter-spacing: 0.3em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  margin: 24px 0;
+}
+
+.settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 20px;
+  align-items: end;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+}
+.settings label { display: grid; gap: 6px; color: var(--muted); font-size: 0.85rem; }
+.settings label.check { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; }
+
+.apps {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 18px;
+  margin-top: 12px;
+}
+
+.app {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  text-align: left;
+  background: var(--surface);
+}
+.app .art {
+  aspect-ratio: 3 / 4;
+  width: 100%;
+  object-fit: cover;
+  background: linear-gradient(160deg, #2a3142, #161a22);
+  display: grid;
+  place-items: center;
+  font-size: 2.4rem;
+  color: var(--muted);
+}
+.app .title { padding: 10px 12px; }
+.app .badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.stream {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  z-index: 10;
+}
+.stream video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+.stream.idle { cursor: none; }
+.stream.idle .stream-bar { opacity: 0; pointer-events: none; }
+
+.stream-message {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  color: var(--muted);
+  pointer-events: none;
+}
+.stream-message:empty { display: none; }
+
+.stream-bar {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(20, 22, 28, 0.85);
+  border-radius: var(--radius);
+  padding: 8px 10px 8px 16px;
+  transition: opacity 0.3s;
+}
+.stream-bar span { margin-right: 8px; }
+
+.stats {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.65);
+  color: #cfe3ff;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font: 12px/1.5 ui-monospace, Consolas, monospace;
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  main { padding: 16px; }
+  .panel { margin: 16px auto; padding: 20px; }
+  .stream-bar { flex-wrap: wrap; width: calc(100% - 32px); }
+}

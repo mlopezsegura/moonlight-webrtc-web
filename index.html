@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Moonlight WebRTC</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar" id="topbar">
+    <span class="brand">Moonlight WebRTC</span>
+    <span class="host" id="host-label"></span>
+    <button type="button" class="link" id="disconnect" hidden>Disconnect</button>
+  </header>
+
+  <main>
+    <section class="panel" id="screen-connect">
+      <h1>Connect to your PC</h1>
+      <p class="hint">The PC must run <a href="https://github.com/mlopezsegura/Sunshine-Web-RTC" target="_blank" rel="noopener">Sunshine-Web-RTC</a> with its WebRTC server enabled.</p>
+      <form id="connect-form" class="form">
+        <label>Address <input id="host" required placeholder="192.168.1.20" autocomplete="off" spellcheck="false"></label>
+        <label>Port <input id="port" type="number" min="1" max="65535" value="8000" required></label>
+        <button type="submit" class="primary">Connect</button>
+      </form>
+      <p class="status" id="connect-status" role="status"></p>
+    </section>
+
+    <section class="panel" id="screen-pair" hidden>
+      <h1>Pair this browser</h1>
+      <p>Open Sunshine's Web UI on the PC, go to <strong>PIN</strong>, select <strong id="pair-name"></strong> and enter:</p>
+      <p class="pin" id="pair-pin">----</p>
+      <p class="status" id="pair-status" role="status"></p>
+      <button type="button" id="pair-new" hidden>New PIN</button>
+    </section>
+
+    <section id="screen-library" hidden>
+      <div class="settings" id="settings">
+        <label>Resolution <select id="setting-mode"></select></label>
+        <label>Frame rate <select id="setting-fps"></select></label>
+        <label>Codec <select id="setting-codec"></select></label>
+        <label>Bitrate <select id="setting-bitrate"></select></label>
+        <label class="check"><input type="checkbox" id="setting-hdr"> HDR</label>
+      </div>
+      <p class="status" id="library-status" role="status"></p>
+      <div class="apps" id="apps"></div>
+    </section>
+  </main>
+
+  <section class="stream" id="screen-stream" hidden>
+    <video id="video" playsinline autoplay></video>
+    <div class="stream-message" id="stream-message"></div>
+    <div class="stream-bar" id="stream-bar">
+      <span id="stream-title"></span>
+      <button type="button" id="stream-stats-toggle">Stats</button>
+      <button type="button" id="stream-fullscreen">Fullscreen</button>
+      <button type="button" id="stream-stop">Disconnect</button>
+      <button type="button" class="danger" id="stream-quit">Quit app</button>
+    </div>
+    <pre class="stats" id="stats" hidden></pre>
+  </section>
+
+  <script src="client-core.js"></script>
+  <script type="module" src="app.mjs"></script>
+</body>
+</html>
