@@ -33,16 +33,16 @@
       </form>
       <p class="status" id="connect-status" role="status"></p>
       <div class="help" id="insecure-help" hidden>
-        <p><strong>Your browser blocked the connection to the PC.</strong> This page is served over https, and
-          Sunshine-Web-RTC's connection is not encrypted (ws://). Browsers only allow that from https pages after you say so:</p>
+        <p><strong>Your browser may be blocking the connection to the PC.</strong> A page on the internet, like
+          this one or the installed app, needs your permission to reach devices on your home network.</p>
         <ol>
-          <li>Click the icon to the left of the address bar and open <strong>Site settings</strong>.</li>
-          <li>Set <strong>Insecure content</strong> to <strong>Allow</strong>.</li>
-          <li>Come back to this page and select <strong>Connect</strong> again.</li>
+          <li>When the browser asks to <strong>look for and connect to devices on your local network</strong>, choose <strong>Allow</strong>.</li>
+          <li>If you dismissed or blocked that request: click the icon to the left of the address bar, open
+            <strong>Site settings</strong>, set <strong>Local network access</strong> to <strong>Allow</strong>, and select <strong>Connect</strong> again.</li>
         </ol>
-        <p>That works in Chrome and Edge, also for the installed app. You can instead
-          <a href="https://github.com/mlopezsegura/moonlight-webrtc-web#run-it-yourself" target="_blank" rel="noopener">run the client yourself</a>
-          over http.</p>
+        <p>Enter the PC's IP address (such as 192.168.1.20) or its <code>.local</code> name: other names are blocked from
+          https pages. Older browsers without that permission need <strong>Insecure content</strong> allowed in Site settings instead.
+          You can also <a href="https://github.com/mlopezsegura/moonlight-webrtc-web#run-it-yourself" target="_blank" rel="noopener">run the client yourself</a> over http.</p>
       </div>
     </section>
 

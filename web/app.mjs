@@ -125,8 +125,7 @@ function connect(host, port) {
   try {
     socket = new WebSocket(`ws://${host.includes(":") ? `[${host}]` : host}:${port}/`);
   } catch (error) {
-    // An https page (GitHub Pages, the installed app) may not open ws:// to another device
-    // until the user allows insecure content for the site.
+    // Browsers without local network access permissions refuse ws:// from https pages outright.
     if (error.name === "SecurityError" && location.protocol === "https:") {
       setStatus("connect-status", "");
       $("insecure-help").hidden = false;
@@ -165,8 +164,40 @@ function connect(host, port) {
       setStatus("connect-status", opened
         ? "The connection to the PC was closed."
         : "Could not reach the PC. Check the address, the port, and that Sunshine-Web-RTC is running.", true);
+      if (!opened) {
+        explainLocalNetworkAccess(host);
+      }
     }
   };
+}
+
+// An https page (GitHub Pages, the installed app) reaches a PC on the LAN only once the user
+// grants the browser's local network permission, and only by IP address or .local name.
+function needsLocalNetworkAccess(host) {
+  return location.protocol === "https:" && !/^(localhost|127\.\d+\.\d+\.\d+|::1)$/i.test(host);
+}
+
+async function localNetworkPermission() {
+  if (!navigator.permissions) {
+    return "unknown";
+  }
+  for (const name of ["local-network", "local-network-access"]) {
+    try {
+      return (await navigator.permissions.query({ name })).state;
+    } catch {
+      // Unknown permission name in this browser.
+    }
+  }
+  return "unknown";
+}
+
+async function explainLocalNetworkAccess(host) {
+  if (!needsLocalNetworkAccess(host)) {
+    return;
+  }
+  if (await localNetworkPermission() !== "granted") {
+    $("insecure-help").hidden = false;
+  }
 }
 
 function disconnectSocket() {
