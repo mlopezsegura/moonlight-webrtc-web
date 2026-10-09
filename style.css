@@ -80,6 +80,19 @@ main {
 .status { min-height: 1.4em; color: var(--muted); }
 .status.error { color: #ffb4b6; }
 
+.help {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border: 1px solid #5b4a1f;
+  border-radius: 8px;
+  background: #241f12;
+  color: #f1e3c0;
+  font-size: 0.92rem;
+}
+.help p { margin: 0 0 8px; }
+.help ol { margin: 0 0 8px; padding-left: 20px; }
+.help a { color: #ffd77a; }
+
 .pin {
   font-size: 3.5rem;
   letter-spacing: 0.3em;

@@ -4,12 +4,21 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Moonlight WebRTC</title>
+  <meta name="description" content="Play the games on your PC in a browser, streamed by Sunshine-Web-RTC.">
+  <meta name="theme-color" content="#0f1115">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+  <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="topbar" id="topbar">
     <span class="brand">Moonlight WebRTC</span>
     <span class="host" id="host-label"></span>
+    <button type="button" class="link" id="install" hidden>Install app</button>
     <button type="button" class="link" id="disconnect" hidden>Disconnect</button>
   </header>
 
@@ -23,6 +32,18 @@
         <button type="submit" class="primary">Connect</button>
       </form>
       <p class="status" id="connect-status" role="status"></p>
+      <div class="help" id="insecure-help" hidden>
+        <p><strong>Your browser blocked the connection to the PC.</strong> This page is served over https, and
+          Sunshine-Web-RTC's connection is not encrypted (ws://). Browsers only allow that from https pages after you say so:</p>
+        <ol>
+          <li>Click the icon to the left of the address bar and open <strong>Site settings</strong>.</li>
+          <li>Set <strong>Insecure content</strong> to <strong>Allow</strong>.</li>
+          <li>Come back to this page and select <strong>Connect</strong> again.</li>
+        </ol>
+        <p>That works in Chrome and Edge, also for the installed app. You can instead
+          <a href="https://github.com/mlopezsegura/moonlight-webrtc-web#run-it-yourself" target="_blank" rel="noopener">run the client yourself</a>
+          over http.</p>
+      </div>
     </section>
 
     <section class="panel" id="screen-pair" hidden>
