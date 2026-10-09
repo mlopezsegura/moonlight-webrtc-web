@@ -1,0 +1,30 @@
+name: Publish web client
+
+# Publishes web/ to the gh-pages branch, which GitHub Pages serves at
+# https://mlopezsegura.github.io/moonlight-webrtc-web/
+on:
+  push:
+    branches: [master]
+    paths: ["web/**", ".github/workflows/pages.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Push web/ to gh-pages
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git subtree split --prefix web -b pages
+          git push --force origin pages:gh-pages
