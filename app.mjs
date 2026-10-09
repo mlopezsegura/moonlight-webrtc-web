@@ -120,11 +120,19 @@ function connect(host, port) {
   $("host-label").textContent = `${host}:${port}`;
   setStatus("connect-status", "Connecting…");
 
+  $("insecure-help").hidden = true;
   let socket;
   try {
     socket = new WebSocket(`ws://${host.includes(":") ? `[${host}]` : host}:${port}/`);
   } catch (error) {
-    setStatus("connect-status", `Invalid address: ${error.message}`, true);
+    // An https page (GitHub Pages, the installed app) may not open ws:// to another device
+    // until the user allows insecure content for the site.
+    if (error.name === "SecurityError" && location.protocol === "https:") {
+      setStatus("connect-status", "");
+      $("insecure-help").hidden = false;
+    } else {
+      setStatus("connect-status", `Invalid address: ${error.message}`, true);
+    }
     return;
   }
   state.socket = socket;
@@ -982,7 +990,31 @@ for (const id of ["setting-fps", "setting-bitrate", "setting-hdr"]) {
   $(id).addEventListener("change", storeSettings);
 }
 
+// The browser offers installation once the manifest and service worker are in place.
+let installPrompt = null;
+window.addEventListener("beforeinstallprompt", (event) => {
+  event.preventDefault();
+  installPrompt = event;
+  $("install").hidden = false;
+});
+window.addEventListener("appinstalled", () => {
+  installPrompt = null;
+  $("install").hidden = true;
+});
+$("install").addEventListener("click", async () => {
+  if (!installPrompt) {
+    return;
+  }
+  installPrompt.prompt();
+  await installPrompt.userChoice.catch(() => null);
+  installPrompt = null;
+  $("install").hidden = true;
+});
+
 async function main() {
+  if ("serviceWorker" in navigator && window.isSecureContext) {
+    navigator.serviceWorker.register("sw.js").catch((error) => console.warn("Service worker", error));
+  }
   show("connect");
   const last = load("lastHost", null);
   if (last) {
