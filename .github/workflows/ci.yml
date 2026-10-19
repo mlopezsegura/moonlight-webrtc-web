@@ -1,0 +1,107 @@
+---
+# Release flow copied from LizardByte/Sunshine (.github/workflows/ci.yml): every push to master is
+# published as a pre-release tagged with the commit's date (vYYYY.MDD.HHMMSS); pull requests are only
+# built and tested. GitHub Pages is published separately by pages.yml.
+name: CI
+permissions: {}
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  release-setup:
+    name: Release Setup
+    outputs:
+      publish_release: ${{ steps.release-setup.outputs.publish_release }}
+      release_body: ${{ steps.release-setup.outputs.release_body }}
+      release_commit: ${{ steps.release-setup.outputs.release_commit }}
+      release_generate_release_notes: ${{ steps.release-setup.outputs.release_generate_release_notes }}
+      release_tag: ${{ steps.release-setup.outputs.release_tag }}
+      release_version: ${{ steps.release-setup.outputs.release_version }}
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Release Setup
+        id: release-setup
+        uses: LizardByte/actions/actions/release_setup@28374bf43cc8b6ee88b9b8a3419b2ac7a6573906  # v2026.928.123224
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-web:
+    name: Web
+    needs: release-setup
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Setup node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1  # v7.1.0
+        with:
+          node-version: 22
+
+      - name: Test
+        run: npm test
+
+      - name: Package web client
+        env:
+          RELEASE_VERSION: ${{ needs.release-setup.outputs.release_version }}
+        run: |
+          mkdir -p artifacts
+          echo "${RELEASE_VERSION}" > web/version.txt
+          (cd web && zip -r -X ../artifacts/moonlight-webrtc-web.zip .)
+          (cd artifacts && sha256sum moonlight-webrtc-web.zip > SHA256SUMS.txt)
+
+      - name: Debug artifacts
+        run: ls -l artifacts
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: build-Web
+          path: artifacts/
+          if-no-files-found: error
+
+  release:
+    name: Release
+    if: needs.release-setup.outputs.publish_release == 'true'
+    needs:
+      - release-setup
+      - build-web
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          path: artifacts
+          pattern: build-*
+          merge-multiple: true
+
+      - name: Debug artifacts
+        run: ls -l artifacts
+
+      - name: Create/Update GitHub Release
+        uses: LizardByte/actions/actions/release_create@28374bf43cc8b6ee88b9b8a3419b2ac7a6573906  # v2026.928.123224
+        with:
+          allowUpdates: false
+          body: ${{ needs.release-setup.outputs.release_body }}
+          generateReleaseNotes: ${{ needs.release-setup.outputs.release_generate_release_notes }}
+          name: ${{ needs.release-setup.outputs.release_tag }}
+          prerelease: true
+          tag: ${{ needs.release-setup.outputs.release_tag }}
+          token: ${{ secrets.GITHUB_TOKEN }}

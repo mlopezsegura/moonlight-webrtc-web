@@ -248,3 +248,8 @@ The tests check the authentication against Node.js's own HMAC-SHA256 and check t
 Every push to `master` that changes `web/` runs [a workflow](.github/workflows/pages.yml) that publishes
 `web/` to the `gh-pages` branch, which GitHub Pages serves. When a release changes any file the service worker
 caches, increase `VERSION` in `web/sw.js` so installed apps refresh their copies.
+
+Every push to `master` also runs [CI](.github/workflows/ci.yml), whose release flow is copied from
+[Sunshine](https://github.com/LizardByte/Sunshine): it runs the tests, packages `web/` as
+`moonlight-webrtc-web.zip` for self-hosting, and publishes it as a pre-release tagged with the commit's date
+(`vYYYY.MDD.HHMMSS`), keeping the two newest pre-releases. Pull requests are built and tested only.
