@@ -166,6 +166,24 @@ main {
 }
 .stream.idle { cursor: none; }
 .stream.idle .stream-bar { opacity: 0; pointer-events: none; }
+.stream.captured .stream-bar { opacity: 0; pointer-events: none; }
+
+.stream-hint {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: calc(100% - 32px);
+  background: rgba(20, 22, 28, 0.85);
+  color: #e6e8ee;
+  border: 0;
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  font: inherit;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+.stream.idle .stream-hint { opacity: 0.35; }
 
 .stream-message {
   position: absolute;
