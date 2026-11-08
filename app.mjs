@@ -2,8 +2,10 @@
 //
 // Video and audio go through the browser's native WebRTC pipeline, which decodes in hardware
 // and is the lowest-latency path a page has. The WebAssembly core (core.mjs) handles client
-// authentication and gamepad snapshots.
+// authentication and gamepad snapshots; input.mjs turns keyboard and mouse events into Moonlight
+// input packets.
 import { loadClientCore } from "./core.mjs";
+import { KeyboardMouse } from "./input.mjs";
 
 const PROTOCOL_VERSION = 2;
 const BITRATES_KBPS = [10000, 12000, 15000, 20000, 25000, 30000, 40000, 50000, 60000, 80000, 100000];
@@ -42,6 +44,9 @@ const state = {
   pendingCandidates: [],
   controlChannel: null,
   gamepadChannel: null,
+  inputChannel: null,  // keyboard and mouse; absent on servers without it
+  keyboardMouse: null,
+  captured: false,  // keyboard and mouse go to the PC
   pads: new Map(),  // browser gamepad index -> { controllerId, announced, rumble }
   nextControllerId: 1,
   pollTimer: 0,
@@ -663,6 +668,19 @@ function createPeer(sessionId) {
       }
     } else if (channel.label === "gamepad") {
       state.gamepadChannel = channel;
+    } else if (channel.label === "input") {
+      state.inputChannel = channel;
+      state.keyboardMouse = new KeyboardMouse((packet) => {
+        if (channel.readyState === "open") {
+          channel.send(packet);
+        }
+      });
+      channel.onopen = updateCaptureHint;
+      channel.onclose = () => {
+        if (state.inputChannel === channel) {
+          releaseCapture();
+        }
+      };
     } else {
       channel.close();
     }
@@ -725,8 +743,12 @@ function closePeer() {
     stopRumble(pad);
   }
   state.pads.clear();
+  releaseCapture();
   state.controlChannel = null;
   state.gamepadChannel = null;
+  state.inputChannel = null;
+  state.keyboardMouse = null;
+  updateCaptureHint();
   if (state.peer) {
     const peer = state.peer;
     state.peer = null;
@@ -945,6 +967,7 @@ async function updateStats() {
     `Lost packets   ${video.packetsLost || 0}   Dropped frames ${video.framesDropped || 0}`,
     `Decoder        ${video.decoderImplementation || "-"}${video.powerEfficientDecoder ? " (hardware)" : ""}`,
     `Gamepads       ${state.pads.size}`,
+    `Keyboard/mouse ${!state.inputChannel ? "not supported by the PC" : state.captured ? "captured" : "click the picture"}`,
   ];
   $("stats").textContent = lines.join("\n");
 }
@@ -960,6 +983,9 @@ function enterFullscreen() {
 
 let idleTimer = 0;
 function markActive() {
+  if (state.captured) {
+    return;
+  }
   screens.stream.classList.remove("idle");
   clearTimeout(idleTimer);
   idleTimer = setTimeout(() => screens.stream.classList.add("idle"), IDLE_CURSOR_MS);
@@ -983,11 +1009,155 @@ $("stream-stats-toggle").addEventListener("click", () => {
   }
 });
 
-// Ctrl+Alt+Shift+Q disconnects, as in Moonlight.
-document.addEventListener("keydown", (event) => {
-  if (!screens.stream.hidden && event.ctrlKey && event.altKey && event.shiftKey && event.code === "KeyQ") {
+// ---------------------------------------------------------------------------------------------
+// Keyboard and mouse
+//
+// Clicking the picture captures the pointer (relative motion, as games expect) and, in fullscreen,
+// the keyboard, so Esc, Alt+Tab and the Windows key reach the PC. Ctrl+Alt+Shift+Z releases them,
+// as in Moonlight; so does holding Esc, which the browser handles itself.
+
+// Input sent before the first frame would be dropped: the PC accepts it once the stream runs.
+function inputReady() {
+  return Boolean(state.inputChannel && state.inputChannel.readyState === "open" && state.keyboardMouse &&
+    $("video").readyState >= HTMLMediaElement.HAVE_CURRENT_DATA);
+}
+
+function updateCaptureHint() {
+  const hint = $("stream-hint");
+  hint.hidden = !inputReady() || state.captured;
+  screens.stream.classList.toggle("captured", state.captured);
+}
+
+function requestCapture() {
+  if (!inputReady() || state.captured || screens.stream.hidden) {
+    return;
+  }
+  enterFullscreen();
+  let request;
+  try {
+    // Raw motion: the PC applies its own pointer acceleration, as with Moonlight.
+    request = screens.stream.requestPointerLock({ unadjustedMovement: true });
+  } catch {
+    request = null;
+  }
+  Promise.resolve(request).catch(() => screens.stream.requestPointerLock());
+}
+
+function releaseCapture() {
+  if (state.keyboardMouse) {
+    state.keyboardMouse.releaseAll();
+  }
+  if (document.pointerLockElement === screens.stream) {
+    document.exitPointerLock();
+  }
+  if (navigator.keyboard && navigator.keyboard.unlock) {
+    navigator.keyboard.unlock();
+  }
+  state.captured = false;
+  updateCaptureHint();
+}
+
+document.addEventListener("pointerlockchange", () => {
+  const captured = document.pointerLockElement === screens.stream && inputReady();
+  if (captured === state.captured) {
+    return;
+  }
+  if (!captured) {
+    releaseCapture();
+    markActive();
+    return;
+  }
+  state.captured = true;
+  $("stream-hint").textContent = CAPTURE_HINT;
+  if (navigator.keyboard && navigator.keyboard.lock && document.fullscreenElement) {
+    navigator.keyboard.lock().catch(() => {});
+  }
+  clearTimeout(idleTimer);
+  screens.stream.classList.add("idle");
+  updateCaptureHint();
+});
+const CAPTURE_HINT = $("stream-hint").textContent;
+document.addEventListener("pointerlockerror", () => {
+  $("stream-hint").textContent = "The browser did not let this page capture the mouse. Click the picture to try again.";
+});
+document.addEventListener("fullscreenchange", () => {
+  if (state.captured && navigator.keyboard && navigator.keyboard.lock) {
+    if (document.fullscreenElement) {
+      navigator.keyboard.lock().catch(() => {});
+    } else {
+      navigator.keyboard.unlock();
+    }
+  }
+});
+window.addEventListener("blur", () => state.keyboardMouse && state.keyboardMouse.releaseAll());
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    releaseCapture();
+  }
+});
+
+$("video").addEventListener("playing", updateCaptureHint);
+$("video").addEventListener("click", requestCapture);
+$("stream-hint").addEventListener("click", requestCapture);
+
+// pointermove, not pointerrawupdate: Chromium can report the first raw update of a burst without its
+// motion, which would make the pointer drift on the PC.
+document.addEventListener("pointermove", (event) => {
+  if (state.captured) {
+    state.keyboardMouse.move(event.movementX, event.movementY);
+  }
+});
+document.addEventListener("mousedown", (event) => {
+  if (state.captured) {
     event.preventDefault();
-    stopSession();
+    state.keyboardMouse.button(event.button, true);
+  }
+});
+document.addEventListener("mouseup", (event) => {
+  if (state.captured) {
+    // Also stops the back and forward buttons from leaving the page.
+    event.preventDefault();
+    state.keyboardMouse.button(event.button, false);
+  }
+});
+document.addEventListener("contextmenu", (event) => {
+  if (state.captured) {
+    event.preventDefault();
+  }
+});
+document.addEventListener("auxclick", (event) => {
+  if (state.captured) {
+    event.preventDefault();
+  }
+});
+document.addEventListener("wheel", (event) => {
+  if (state.captured) {
+    event.preventDefault();
+    state.keyboardMouse.wheel(event);
+  }
+}, { passive: false });
+
+document.addEventListener("keydown", (event) => {
+  if (screens.stream.hidden) {
+    return;
+  }
+  // Ctrl+Alt+Shift+Q disconnects and Ctrl+Alt+Shift+Z releases the keyboard and mouse, as in Moonlight.
+  if (event.ctrlKey && event.altKey && event.shiftKey && (event.code === "KeyQ" || event.code === "KeyZ")) {
+    event.preventDefault();
+    if (event.code === "KeyQ") {
+      stopSession();
+    } else {
+      releaseCapture();
+    }
+    return;
+  }
+  if (state.captured && state.keyboardMouse.key(event, true)) {
+    event.preventDefault();
+  }
+});
+document.addEventListener("keyup", (event) => {
+  if (!screens.stream.hidden && state.captured && state.keyboardMouse.key(event, false)) {
+    event.preventDefault();
   }
 });
 
