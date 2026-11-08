@@ -1191,6 +1191,103 @@ for (const id of ["setting-fps", "setting-bitrate", "setting-hdr"]) {
   $(id).addEventListener("change", storeSettings);
 }
 
+// ---------------------------------------------------------------------------------------------
+// Appearance. theme.js has already applied the stored choice; this is the dialog that changes it.
+
+const Theme = window.MoonlightTheme;
+const COLOR_LABELS = { accent: "Accent", bg: "Background", surface: "Panels", text: "Text" };
+
+function themeSwatch(name) {
+  const swatch = document.createElement("span");
+  swatch.className = "theme-swatch";
+  const names = name === "auto" ? [Theme.AUTO.dark, Theme.AUTO.light] : [name];
+  if (name === "auto") {
+    swatch.classList.add("auto");
+  }
+  for (const themeName of names) {
+    const values = Theme.tokens({ theme: themeName });
+    for (const color of name === "auto" ? [values.bg, values.accent] : [values.bg, values.surface, values.accent, values.text]) {
+      const part = document.createElement("span");
+      part.style.background = color;
+      swatch.append(part);
+    }
+  }
+  return swatch;
+}
+
+function renderAppearance() {
+  const current = Theme.current();
+  const list = $("theme-list");
+  list.replaceChildren();
+  for (const name of [...Object.keys(Theme.THEMES), "auto"]) {
+    const label = document.createElement("label");
+    label.className = "theme";
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "theme";
+    input.value = name;
+    input.checked = current.theme === name;
+    // A theme starts from its own colors; custom colors are tweaks on top of it.
+    input.addEventListener("change", () => changeAppearance({ theme: name, colors: {} }));
+    const title = document.createElement("span");
+    title.textContent = name === "auto" ? Theme.AUTO.label : Theme.THEMES[name].label;
+    label.append(input, themeSwatch(name), title);
+    list.append(label);
+  }
+  renderColors();
+}
+
+function renderColors() {
+  const current = Theme.current();
+  const values = Theme.tokens(current, Theme.systemPrefersLight());
+  const colors = $("color-list");
+  colors.replaceChildren();
+  for (const key of Theme.CUSTOM_KEYS) {
+    const label = document.createElement("label");
+    label.classList.toggle("custom", Object.hasOwn(current.colors, key));
+    label.title = Object.hasOwn(current.colors, key) ? "Your color" : "The theme's color";
+    const input = document.createElement("input");
+    input.type = "color";
+    input.value = values[key];
+    input.addEventListener("input", () => {
+      const now = Theme.current();
+      changeAppearance({ ...now, colors: { ...now.colors, [key]: input.value } }, false);
+      label.classList.add("custom");
+      label.title = "Your color";
+      warnContrast();
+    });
+    input.addEventListener("change", () => renderColors());
+    label.append(COLOR_LABELS[key], input);
+    colors.append(label);
+  }
+  warnContrast();
+}
+
+function warnContrast() {
+  const values = Theme.tokens(Theme.current(), Theme.systemPrefersLight());
+  const low = Theme.contrast(values.text, values.bg) < 4.5 || Theme.contrast(values.text, values.surface) < 4.5;
+  $("contrast-warning").textContent = low ? "Text may be hard to read on these colors." : "";
+}
+
+function changeAppearance(appearance, rerender = true) {
+  Theme.apply(appearance);
+  Theme.save(Theme.current());
+  if (rerender) {
+    renderColors();
+  }
+}
+
+$("appearance-open").addEventListener("click", () => {
+  renderAppearance();
+  $("appearance").showModal();
+  // Arrow keys then move between themes from the one in use.
+  $("theme-list").querySelector("input:checked")?.focus();
+});
+$("appearance-reset").addEventListener("click", () => {
+  changeAppearance({ theme: Theme.DEFAULT_THEME, colors: {} });
+  renderAppearance();
+});
+
 // The browser offers installation once the manifest and service worker are in place.
 let installPrompt = null;
 window.addEventListener("beforeinstallprompt", (event) => {
