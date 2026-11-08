@@ -13,11 +13,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="stylesheet" href="style.css">
+  <script src="theme.js"></script>
 </head>
 <body>
   <header class="topbar" id="topbar">
     <span class="brand">Moonlight WebRTC</span>
     <span class="host" id="host-label"></span>
+    <button type="button" class="link" id="appearance-open">Appearance</button>
     <button type="button" class="link" id="install" hidden>Install app</button>
     <button type="button" class="link" id="disconnect" hidden>Disconnect</button>
   </header>
@@ -80,6 +82,23 @@
     </div>
     <pre class="stats" id="stats" hidden></pre>
   </section>
+
+  <dialog class="appearance" id="appearance" aria-labelledby="appearance-title">
+    <form method="dialog">
+      <h2 id="appearance-title">Appearance</h2>
+      <fieldset>
+        <legend>Theme</legend>
+        <div class="themes" id="theme-list"></div>
+      </fieldset>
+      <h3>Colors</h3>
+      <div class="colors" id="color-list"></div>
+      <p class="contrast-warning" id="contrast-warning" role="status"></p>
+      <div class="dialog-actions">
+        <button type="button" id="appearance-reset">Reset to default</button>
+        <button type="submit" class="primary">Done</button>
+      </div>
+    </form>
+  </dialog>
 
   <script src="client-core.js"></script>
   <script type="module" src="app.mjs"></script>
