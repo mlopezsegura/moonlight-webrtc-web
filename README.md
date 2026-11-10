@@ -7,7 +7,7 @@ Open it in Chrome or Edge on any computer in your home network, pair it once wit
 your gaming PC. Use it straight from the web, or install it as an app.**
 
 <p align="center">
-  <a href="https://openstreamms.github.io/moonlight-webrtc-web/"><strong>▶ Open Moonlight WebRTC Web</strong></a>
+  <a href="https://openstreamco.github.io/moonlight-webrtc-web/"><strong>▶ Open Moonlight WebRTC Web</strong></a>
 </p>
 
 > [!IMPORTANT]
