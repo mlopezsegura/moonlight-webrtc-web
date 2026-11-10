@@ -7,7 +7,7 @@ Open it in Chrome or Edge on any computer in your home network, pair it once wit
 your gaming PC. Use it straight from the web, or install it as an app.**
 
 <p align="center">
-  <a href="https://mlopezsegura.github.io/moonlight-webrtc-web/"><strong>▶ Open Moonlight WebRTC Web</strong></a>
+  <a href="https://OpenstreamMS/moonlight-webrtc-web/"><strong>▶ Open Moonlight WebRTC Web</strong></a>
 </p>
 
 > [!IMPORTANT]
@@ -39,7 +39,7 @@ your gaming PC. Use it straight from the web, or install it as an app.**
 
 | Where | What |
 | --- | --- |
-| **Gaming PC** | [Sunshine-Web-RTC](https://github.com/mlopezsegura/Sunshine-Web-RTC) running, with its WebRTC server enabled (port 8000 by default). Regular Sunshine does **not** work: it has no WebRTC server. |
+| **Gaming PC** | [Sunshine-Web-RTC](https://github.com/OpenstreamMS/Sunshine-Web-RTC) running, with its WebRTC server enabled (port 8000 by default). Regular Sunshine does **not** work: it has no WebRTC server. |
 | **Computer you play on** | A recent desktop browser. Chrome and Edge give the best results (more codecs, rumble, app install). |
 | **Network** | Both computers on the same local network. |
 
@@ -49,7 +49,7 @@ Nothing has to be installed on the computer you play on.
 
 ## Use it online
 
-1. Open **<https://mlopezsegura.github.io/moonlight-webrtc-web/>**.
+1. Open **<https://OpenstreamMS.github.io/moonlight-webrtc-web/>**.
 2. Enter the gaming PC's **IP address** (for example `192.168.1.20`) and port `8000`, then select **Connect**.
 3. The browser asks to **look for and connect to devices on your local network**. Choose **Allow**.
 4. The first time, pair the browser (see [Pairing](#pairing)). Then choose an application and play.
@@ -236,7 +236,7 @@ with Moonlight. Held keys and buttons are released when the capture ends, the wi
 stream stops.
 
 The page speaks the same protocol as the Moonlight WebRTC TV app, described in
-[the TV app's protocol document](https://github.com/mlopezsegura/moonlight-webrtc-tizen/blob/master/docs/protocol.md),
+[the TV app's protocol document](https://github.com/OpenstreamMS/moonlight-webrtc-tizen/blob/master/docs/protocol.md),
 plus the `input` channel, which the TV app ignores.
 
 ---
@@ -274,9 +274,9 @@ and mouse packets against Moonlight's layouts.
 
 ## Related projects
 
-- [Sunshine-Web-RTC](https://github.com/mlopezsegura/Sunshine-Web-RTC): the Sunshine build with a
+- [Sunshine-Web-RTC](https://github.com/OpenstreamMS/Sunshine-Web-RTC): the Sunshine build with a
   WebRTC server that this client connects to.
-- [Moonlight WebRTC for Samsung TVs](https://github.com/mlopezsegura/moonlight-webrtc-tizen): the TV
+- [Moonlight WebRTC for Samsung TVs](https://github.com/OpenstreamMS/moonlight-webrtc-tizen): the TV
   app that uses the same protocol, based on
   [Moonlight WebRTC by tsoas](https://github.com/tsoas/moonlight-webrtc-tizen).
 - [Sunshine](https://github.com/LizardByte/Sunshine) and [Moonlight](https://moonlight-stream.org/): the
