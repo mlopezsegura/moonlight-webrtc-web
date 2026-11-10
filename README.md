@@ -39,7 +39,7 @@ your gaming PC. Use it straight from the web, or install it as an app.**
 
 | Where | What |
 | --- | --- |
-| **Gaming PC** | [Sunshine-Web-RTC](https://github.com/OpenstreamMS/Sunshine-Web-RTC) running, with its WebRTC server enabled (port 8000 by default). Regular Sunshine does **not** work: it has no WebRTC server. |
+| **Gaming PC** | [Sunshine-Web-RTC](https://github.com/OpenstreamCO/Sunshine-Web-RTC) running, with its WebRTC server enabled (port 8000 by default). Regular Sunshine does **not** work: it has no WebRTC server. |
 | **Computer you play on** | A recent desktop browser. Chrome and Edge give the best results (more codecs, rumble, app install). |
 | **Network** | Both computers on the same local network. |
 
@@ -49,7 +49,7 @@ Nothing has to be installed on the computer you play on.
 
 ## Use it online
 
-1. Open **<https://OpenstreamMS.github.io/moonlight-webrtc-web/>**.
+1. Open **<https://OpenstreamCO.github.io/moonlight-webrtc-web/>**.
 2. Enter the gaming PC's **IP address** (for example `192.168.1.20`) and port `8000`, then select **Connect**.
 3. The browser asks to **look for and connect to devices on your local network**. Choose **Allow**.
 4. The first time, pair the browser (see [Pairing](#pairing)). Then choose an application and play.
