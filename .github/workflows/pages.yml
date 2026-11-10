@@ -1,7 +1,7 @@
 name: Publish web client
 
 # Publishes web/ to the gh-pages branch, which GitHub Pages serves at
-# https://mlopezsegura.github.io/moonlight-webrtc-web/
+# https://openstreamco.github.io/moonlight-webrtc-web/
 on:
   push:
     branches: [master]
